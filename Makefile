@@ -30,7 +30,7 @@ build/index.css: src/index.scss
 # Data
 
 build/config.json: package.json
-	node -e 'var pjson = require("./package.json"); process.stdout.write(JSON.stringify(Object.assign(pjson.config, {environment: "${ENVIRONMENT}", "version": pjson.version, deployTime: Date.now()}), "\t", 2))' > $@
+	node -e 'var pjson = require("./package.json"); process.stdout.write(JSON.stringify(Object.assign(pjson.config, {environment: "${ENVIRONMENT}", "version": pjson.version, deployTime: Date.now(), baseHref: "${BASE_HREF}".length ? "${BASE_HREF}" : pjson.config.baseHref}), "\t", 2))' > $@
 
 # HTML
 

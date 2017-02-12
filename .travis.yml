@@ -7,7 +7,7 @@ branches:
   except:
   - "/^v\\d+\\.\\d+\\.\\d+$/"
 script:
-- make demo
+- ENVIRONMENT=production make demo
 - npm run lint
 - npm run test
 after_success:

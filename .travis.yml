@@ -1,0 +1,21 @@
+language: node_js
+node_js: 'node'
+cache:
+  directories:
+  - node_modules
+branches:
+  except:
+  - "/^v\\d+\\.\\d+\\.\\d+$/"
+script:
+- make demo
+- npm run lint
+- npm run test
+after_success:
+- |
+  cd build
+  git init
+  git config user.name "Travis CI"
+  git config user.email "m@coderbyheart.com"
+  git add .
+  git commit -m "Deploy to GitHub Pages"
+  git push --force --quiet "https://${GH_TOKEN}@github.com/${TRAVIS_REPO_SLUG}.git" master:gh-pages > /dev/null 2>&1

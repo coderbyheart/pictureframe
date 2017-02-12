@@ -7,7 +7,7 @@ branches:
   except:
   - "/^v\\d+\\.\\d+\\.\\d+$/"
 script:
-- ENVIRONMENT=production BASE_HREF=pictureframe/ make demo
+- ENVIRONMENT=production BASE_HREF=/pictureframe/ make demo
 - npm run lint
 - npm run test
 after_success:

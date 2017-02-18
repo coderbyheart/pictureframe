@@ -38,6 +38,53 @@ build/index.html: src/index.html build/index.min.js build/config.json build/inde
 	@mkdir -p $(dir $@)
 	./node_modules/.bin/rheactor-build-views build build/config.json $< $@
 
+# Deploy
+
+AWS_REGION ?= eu-central
+S3_CFG := /tmp/.s3cfg-$(AWS_WEBSITE_BUCKET)
+
+deploy: guard-AWS_WEBSITE_BUCKET guard-AWS_ACCESS_KEY_ID guard-AWS_SECRET_ACCESS_KEY guard-VERSION
+
+	# Create s3cmd config
+	@echo $(S3_CFG)
+	@echo "[default]" > $(S3_CFG)
+	@echo "access_key = $(AWS_ACCESS_KEY_ID)" >> $(S3_CFG)
+	@echo "secret_key = $(AWS_SECRET_ACCESS_KEY)" >> $(S3_CFG)
+	@echo "bucket_location = $(AWS_REGION)" >> $(S3_CFG)
+
+	rm -rf build
+	ENVIRONMENT=production make -B build
+	rm build/index.js
+	rm build/index.css
+	s3cmd -c $(S3_CFG) \
+		 sync --delete-removed ./build/ s3://$(AWS_WEBSITE_BUCKET)/
+
+	# Expires 1 minutes for html files
+	s3cmd -c $(S3_CFG) \
+		modify --recursive \
+		--add-header=Cache-Control:public,max-age=60 \
+		--remove-header=Expires \
+		--add-header=x-amz-meta-version:$(VERSION) \
+		--exclude "*" --include "*.html" --include "*.txt" \
+		s3://$(AWS_WEBSITE_BUCKET)/
+
+	# Expires 1 year for everything else
+	s3cmd -c $(S3_CFG) \
+		modify --recursive \
+		--add-header=Cache-Control:public,max-age=31536000 \
+		--remove-header=Expires \
+		--add-header=x-amz-meta-version:$(VERSION) \
+		--exclude "*.html" --exclude "*.txt" \
+		s3://$(AWS_WEBSITE_BUCKET)/
+
+# Helpers
+
+guard-%:
+	@ if [ "${${*}}" = "" ]; then \
+		echo "Environment variable $* not set"; \
+		exit 1; \
+	fi
+
 # Main
 
 help: ## (default), display the list of make commands
@@ -45,6 +92,8 @@ help: ## (default), display the list of make commands
 
 clean:
 	rm -rf dist build
+
+build: build/index.html
 
 demo: build/index.html ## Use demo data
 	cp example/pictures.json build

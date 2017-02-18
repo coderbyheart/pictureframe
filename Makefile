@@ -29,8 +29,8 @@ build/index.css: src/index.scss
 
 # Data
 
-build/config.json: package.json
-	node -e 'var pjson = require("./package.json"); process.stdout.write(JSON.stringify(Object.assign(pjson.config, {environment: "${ENVIRONMENT}", "version": pjson.version, deployTime: Date.now(), baseHref: "${BASE_HREF}".length ? "${BASE_HREF}" : pjson.config.baseHref}), "\t", 2))' > $@
+build/config.json: guard-VERSION guard-ENVIRONMENT package.json
+	node -e 'var pjson = require("./package.json"); process.stdout.write(JSON.stringify(Object.assign(pjson.config, {environment: "${ENVIRONMENT}", "version": "${VERSION}", deployTime: Date.now(), baseHref: "${BASE_HREF}".length ? "${BASE_HREF}" : pjson.config.baseHref}), "\t", 2))' > $@
 
 # HTML
 
@@ -56,8 +56,7 @@ deploy: guard-AWS_WEBSITE_BUCKET guard-AWS_ACCESS_KEY_ID guard-AWS_SECRET_ACCESS
 	ENVIRONMENT=production make -B build
 	rm build/index.js
 	rm build/index.css
-	s3cmd -c $(S3_CFG) \
-		 sync --delete-removed ./build/ s3://$(AWS_WEBSITE_BUCKET)/
+	s3cmd -c $(S3_CFG) sync ./build/ s3://$(AWS_WEBSITE_BUCKET)/
 
 	# Expires 1 minutes for html files
 	s3cmd -c $(S3_CFG) \

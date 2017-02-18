@@ -98,6 +98,7 @@ $(() => {
   let pf
   $.ajax({
     url: `./pictures.json?${Date.now()}`,
+    dataType: 'json',
     success: pictures => {
       pf = new PictureFrame($, container, pictures)
       container.on('click', () => {

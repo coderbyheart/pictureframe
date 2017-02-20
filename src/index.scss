@@ -1,7 +1,10 @@
+html {
+  background-color: #000;
+}
+
 body {
   margin: 0;
   padding: 0;
-  background-color: #000;
 }
 
 img.photo {
@@ -19,10 +22,10 @@ img.photo {
 }
 
 main.pictureframe {
+  width:100%;
+  height:100%;
   position: absolute;
   top: 0;
   left: 0;
-  width:100%;
-  height:100%;
   overflow: hidden;
 }

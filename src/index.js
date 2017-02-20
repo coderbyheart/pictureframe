@@ -1,6 +1,4 @@
 import jquery from 'jquery'
-import Velocity from 'velocity-animate'
-import {viewBox} from './viewbox'
 
 /* global window */
 
@@ -25,7 +23,7 @@ class PictureFrame {
     this.$ = $
     this.container = container
     this.photos = photos
-    this.secondsPerPicture = 30
+    this.secondsPerPicture = 10
     this.init()
   }
 
@@ -41,7 +39,8 @@ class PictureFrame {
   }
 
   stop () {
-    this.running = false
+    window.clearInterval(this.running)
+    this.running = undefined
   }
 
   resize () {
@@ -51,12 +50,13 @@ class PictureFrame {
   }
 
   start () {
-    this.running = true
+    this.running = window.setInterval(this.next.bind(this), this.secondsPerPicture * 1000)
     this.next()
   }
 
   next () {
     if (!this.running) return
+    this.resize()
     this.current++
     let prev = this.elements[this.current - 1]
     if (prev) {
@@ -68,28 +68,11 @@ class PictureFrame {
     const p = this.photos[this.current]
     const e = this.elements[this.current]
     e.addClass('active')
-    this.resize()
-    const vb = viewBox(p.width, p.height, this.width, this.height)
-    e.css({
-      top: 0,
-      left: 0,
-      width: vb.width,
-      height: vb.height
-    })
-    Velocity(
-      e,
-      {
-        top: vb.top,
-        left: vb.left
-      },
-      {
-        duration: Math.max(this.secondsPerPicture * 1000, Math.max(Math.abs(vb.left), Math.abs(vb.top)) / 100 * 1000),
-        easing: 'easeinout',
-        complete: () => {
-          this.next()
-        }
-      }
-    )
+    if (p.width > p.height) {
+      e.css({width: this.width, height: this.width / p.width * p.height, top: Math.round((this.height - (this.width / p.width * p.height)) / 2)})
+    } else {
+      e.css({height: this.height, width: this.height / p.height * p.width, left: Math.round((this.width - (this.height / p.height * p.width)) / 2)})
+    }
   }
 }
 

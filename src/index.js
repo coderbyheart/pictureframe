@@ -65,7 +65,7 @@ class PictureFrame {
     this.next()
   }
 
-  gotoPrev() {
+  gotoPrev () {
     this.stop()
     this.elements[this.current].removeClass('active')
     this.current -= 2
@@ -73,7 +73,7 @@ class PictureFrame {
     this.start()
   }
 
-  gotoNext() {
+  gotoNext () {
     this.stop()
     this.start()
   }

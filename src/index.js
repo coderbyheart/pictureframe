@@ -35,6 +35,17 @@ class PictureFrame {
       const type = this.photos[key].portrait ? 'portrait' : 'landscape'
       this.elements.push(this.$(`<img src="${photo.url}" alt="${photo.title}" width="${photo.width}" height="${photo.height}" class="photo ${type}">`).appendTo(this.container))
     })
+    this.container.bind('touchstart', ev => {
+      const xpos = ev.originalEvent.touches[0].pageX
+      if (xpos < this.width / 4) {
+        this.gotoPrev()
+        ev.preventDefault()
+      }
+      if (xpos > this.width * 0.75) {
+        this.gotoNext()
+        ev.preventDefault()
+      }
+    })
     this.start()
   }
 
@@ -52,6 +63,19 @@ class PictureFrame {
   start () {
     this.running = window.setInterval(this.next.bind(this), this.secondsPerPicture * 1000)
     this.next()
+  }
+
+  gotoPrev() {
+    this.stop()
+    this.elements[this.current].removeClass('active')
+    this.current -= 2
+    if (this.current < 0) this.current = this.elements.length - 2
+    this.start()
+  }
+
+  gotoNext() {
+    this.stop()
+    this.start()
   }
 
   next () {

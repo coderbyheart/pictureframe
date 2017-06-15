@@ -6,6 +6,8 @@ cache:
 branches:
   except:
   - "/^v\\d+\\.\\d+\\.\\d+$/"
+before_install:
+- npm i -g npm5@latest
 script:
 - VERSION=0.0.0-development ENVIRONMENT=production BASE_HREF=/pictureframe/ make demo
 - npm run lint

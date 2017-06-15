@@ -40,7 +40,7 @@ build/index.html: src/index.html build/index.min.js build/config.json build/inde
 
 # Deploy
 
-AWS_REGION ?= eu-central
+AWS_REGION ?= eu-central-1
 S3_CFG := /tmp/.s3cfg-$(AWS_WEBSITE_BUCKET)
 
 deploy: guard-AWS_WEBSITE_BUCKET guard-AWS_ACCESS_KEY_ID guard-AWS_SECRET_ACCESS_KEY guard-VERSION
@@ -76,6 +76,41 @@ deploy: guard-AWS_WEBSITE_BUCKET guard-AWS_ACCESS_KEY_ID guard-AWS_SECRET_ACCESS
 		--exclude "*.html" --exclude "*.txt" \
 		s3://$(AWS_WEBSITE_BUCKET)/
 
+# Lambda
+
+AWS_FUNCTION_NAME ?= pictureframe
+AWS_ROLE ?= pictureframe
+
+lambda.zip: src/*.js package.json
+	rm -f $@
+	rm -rf lambda
+	./node_modules/.bin/babel src -d lambda
+	cp package.json lambda
+	cd lambda; npm install --production > /dev/null
+	cd lambda; zip -r -q ../$@ ./
+
+deploy-lambda: lambda.zip guard-AWS_ACCOUNT ## Deploy to AWS lambda
+	aws lambda create-function \
+	--region $(AWS_REGION) \
+	--function-name $(AWS_FUNCTION_NAME) \
+	--zip-file fileb://$< \
+	--role arn:aws:iam::$(AWS_ACCOUNT):role/$(AWS_ROLE) \
+	--timeout 50 \
+	--handler lambdas.$(AWS_FUNCTION_NAME) \
+	--runtime nodejs6.10
+
+update-lambda-function: lambda.zip ## Update the lambda function with new lambda
+	aws lambda update-function-code \
+	--region $(AWS_REGION) \
+	--function-name $(AWS_FUNCTION_NAME) \
+	--zip-file fileb://$<
+
+delete-lambda: ## Deploy from AWS lambda
+	aws lambda delete-function --region $(AWS_REGION) --function-name $(AWS_FUNCTION_NAME)
+
+update-lambda: ## Update the lambda
+	make update-lambda-function
+
 # Helpers
 
 guard-%:
@@ -90,7 +125,7 @@ help: ## (default), display the list of make commands
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
 clean:
-	rm -rf dist build
+	rm -rf dist build lambda
 
 build: build/index.html
 

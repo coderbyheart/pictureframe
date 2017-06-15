@@ -36,6 +36,7 @@
     "mocha": "^3.4.2",
     "node-sass": "^4.5.3",
     "node-static": "^0.7.9",
+    "request-promise": "^4.2.1",
     "rheactor-build-views": "4.x",
     "standard": "^10.0.2",
     "uglifycss": "0.0.27",

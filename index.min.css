@@ -1,0 +1,1 @@
+html{background-color:#000}body{margin:0;padding:0}img.photo{margin:0;padding:0;position:absolute;top:0;left:0;opacity:0;transition:opacity 1s ease-in-out}img.photo.active{opacity:1;transition:opacity 1s ease-in-out}main.pictureframe{width:100%;height:100%;position:absolute;top:0;left:0;overflow:hidden}

@@ -35,7 +35,7 @@
     "husky": "^0.14.0",
     "mocha": "^5.0.0",
     "node-sass": "^4.5.3",
-    "node-static": "^0.7.9",
+    "node-static": "^0.7.11",
     "rheactor-build-views": "4.x",
     "standard": "^11.0.0",
     "uglifycss": "0.0.28",
